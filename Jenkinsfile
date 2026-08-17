@@ -9,6 +9,11 @@ pipeline {
 
   environment {
     COMPOSE_PROJECT_NAME = 'campuspulse'
+
+    // Demo/local Jenkins deployment values.
+    // Do NOT use real production secrets here.
+    JWT_SECRET = 'campuspulse-jenkins-demo-secret'
+    POSTGRES_PASSWORD = 'campuspulse-db-password'
   }
 
   stages {
@@ -46,7 +51,7 @@ pipeline {
     }
 
     stage('Docker Build') {
-    steps {
+      steps {
         bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" build --pull'
       }
     }
@@ -67,14 +72,15 @@ pipeline {
   post {
     success {
       echo 'CampusPulse CI/CD pipeline completed successfully.'
+      bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" ps'
     }
 
     failure {
-      echo 'Pipeline failed. Deployment stages after the failure point were not executed.'
+      echo 'Pipeline failed. Check the failed stage in Console Output.'
     }
 
     always {
-      bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" ps'
+      echo 'CampusPulse pipeline execution finished.'
     }
   }
 }
