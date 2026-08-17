@@ -46,22 +46,20 @@ pipeline {
     }
 
     stage('Docker Build') {
-      steps {
-        bat 'docker compose build --pull'
+    steps {
+        bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" build --pull'
       }
     }
 
     stage('Deploy') {
       steps {
-        bat 'docker compose up -d --remove-orphans'
+        bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" up -d'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        bat '''
-          powershell -Command "$ok=$false; for($i=1;$i -le 30;$i++){ try { Invoke-WebRequest -Uri http://localhost/api/health -UseBasicParsing -ErrorAction Stop; $ok=$true; break } catch { Start-Sleep -Seconds 2 } }; if(-not $ok){ exit 1 }"
-        '''
+        bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" ps'
       }
     }
   }
@@ -76,7 +74,7 @@ pipeline {
     }
 
     always {
-      bat 'docker compose ps'
+      bat '"C:\\Users\\pandr\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker-compose.exe" ps'
     }
   }
 }
