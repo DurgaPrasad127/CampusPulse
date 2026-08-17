@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: campuspulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-campuspulse}
+      POSTGRES_USER: ${POSTGRES_USER:-campuspulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-campuspulse} -d ${POSTGRES_DB:-campuspulse}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [campuspulse]
+
+  backend:
+    build:
+      context: ./backend
+    container_name: campuspulse-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-campuspulse}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-campuspulse}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      CORS_ORIGIN: http://localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks: [campuspulse]
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: campuspulse-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "80:80"
+    networks: [campuspulse]
+
+volumes:
+  postgres_data:
+
+networks:
+  campuspulse:
+    driver: bridge

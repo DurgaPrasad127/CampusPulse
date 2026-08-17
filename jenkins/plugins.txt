@@ -1,0 +1,6 @@
+workflow-aggregator
+git
+github
+docker-workflow
+credentials-binding
+junit
