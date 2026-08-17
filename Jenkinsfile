@@ -12,49 +12,56 @@ pipeline {
   }
 
   stages {
+
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+      }
     }
 
     stage('Install Dependencies') {
       steps {
-        sh 'npm install --prefix backend'
-        sh 'npm install --prefix frontend'
+        bat 'npm install --prefix backend'
+        bat 'npm install --prefix frontend'
       }
     }
 
     stage('Lint') {
       steps {
-        sh 'npm run lint --prefix backend'
-        sh 'npm run lint --prefix frontend'
+        bat 'npm run lint --prefix backend'
+        bat 'npm run lint --prefix frontend'
       }
     }
 
     stage('Test') {
       steps {
-        sh 'npm test --prefix backend -- --ci'
+        bat 'npm test --prefix backend -- --ci'
       }
     }
 
     stage('Build Frontend') {
-      steps { sh 'npm run build --prefix frontend' }
+      steps {
+        bat 'npm run build --prefix frontend'
+      }
     }
 
     stage('Docker Build') {
       steps {
-        sh 'docker compose build --pull'
+        bat 'docker compose build --pull'
       }
     }
 
     stage('Deploy') {
       steps {
-        sh 'docker compose up -d --remove-orphans'
+        bat 'docker compose up -d --remove-orphans'
       }
     }
 
     stage('Smoke Test') {
       steps {
-        sh 'for i in $(seq 1 30); do curl -fsS http://localhost/api/health && exit 0; sleep 2; done; exit 1'
+        bat '''
+          powershell -Command "$ok=$false; for($i=1;$i -le 30;$i++){ try { Invoke-WebRequest -Uri http://localhost/api/health -UseBasicParsing -ErrorAction Stop; $ok=$true; break } catch { Start-Sleep -Seconds 2 } }; if(-not $ok){ exit 1 }"
+        '''
       }
     }
   }
@@ -63,11 +70,13 @@ pipeline {
     success {
       echo 'CampusPulse CI/CD pipeline completed successfully.'
     }
+
     failure {
       echo 'Pipeline failed. Deployment stages after the failure point were not executed.'
     }
+
     always {
-      sh 'docker compose ps || true'
+      bat 'docker compose ps'
     }
   }
 }
