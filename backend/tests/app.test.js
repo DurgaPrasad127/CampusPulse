@@ -17,7 +17,6 @@ jest.unstable_mockModule('../config/db.js', () => ({
 }));
 
 const { default: app } = await import('../server.js');
-const db = await import('../config/db.js');
 
 const studentToken = jwt.sign(
   {
