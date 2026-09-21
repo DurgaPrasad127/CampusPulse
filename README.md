@@ -18,7 +18,7 @@ Git push → GitHub → Webhook → Jenkins → Checkout → Install → Lint �
 2. Run `docker compose up -d --build`.
 3. Create the admin:
    `docker compose exec backend node scripts/seed-admin.js`
-4. Open http://localhost
+4. Open generated URL
 5. Register a student account.
 
 ## Development without Docker
